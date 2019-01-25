@@ -117,7 +117,7 @@ extension MIDIObject {
     public func data(for property: String) throws -> Data {
         var data: Unmanaged<CFData>? = nil
         try MIDIObjectGetDataProperty(reference, property as CFString, &data).midiError("Getting data for property \"\(property)\" on MIDIObject")
-        return data!.takeUnretainedValue() as Data
+        return data!.takeRetainedValue() as Data
     }
     
     public func set(data: Data, for property: String) throws {
@@ -127,7 +127,7 @@ extension MIDIObject {
     public func dictionary(for property: String) throws -> NSDictionary {
         var dictionary: Unmanaged<CFDictionary>? = nil
         try MIDIObjectGetDictionaryProperty(reference, property as CFString, &dictionary).midiError("Getting dictionary for property \"\(property)\" on MIDIObject")
-        return dictionary!.takeUnretainedValue() as NSDictionary
+        return dictionary!.takeRetainedValue() as NSDictionary
     }
     
     public func set(dictionary: NSDictionary, for property: String) throws {
@@ -141,7 +141,7 @@ extension MIDIObject {
     public func properties(deep: Bool = false) throws -> NSDictionary {
         var propertyList: Unmanaged<CFPropertyList>? = nil
         try MIDIObjectGetProperties(reference, &propertyList, deep).midiError("Getting properties for MIDIObject")
-        return propertyList!.takeUnretainedValue() as! NSDictionary
+        return propertyList!.takeRetainedValue() as! NSDictionary
     }
     
 }
