@@ -44,18 +44,10 @@ extension MIDIDestination {
     // This function is what I would expect you would use if sending very SysEx messages with more than 256 bytes;
     // otherwise, consider just using `MIDIMessage(bytes:)` instead.
     public func send(systemExclusiveEvent bytes: [UInt8], completion: @escaping SystemExclusiveEventCompletion = {}) throws {
-        let completionReference = UnsafeMutablePointer<SystemExclusiveEventCompletion>.allocate(capacity: 1)
-        completionReference.initialize(to: completion)
+        let completionProcedure: MIDICompletionProc = { _ in }
         
-        let completionProcedure: MIDICompletionProc = { requestPointer in
-            guard let completion = requestPointer.pointee.completionRefCon?.assumingMemoryBound(to: SystemExclusiveEventCompletion.self).pointee else {
-                return
-            }
-            
-            completion()
-        }
-        
-        var request = Data(bytes: bytes).withUnsafeBytes { pointer in
+        let data = Data(bytes: bytes)
+        var request = data.withUnsafeBytes { pointer in
             return MIDISysexSendRequest(
                 destination: reference,
                 data: pointer,
@@ -63,11 +55,13 @@ extension MIDIDestination {
                 complete: false,
                 reserved: (0, 0, 0),
                 completionProc: completionProcedure,
-                completionRefCon: completionReference
+                completionRefCon: nil
             )
         }
         
         try MIDISendSysex(&request).midiError("Sending system exclusive event")
+		while request.complete == false {}
+		completion()
     }
     
 }
