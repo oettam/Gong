@@ -107,7 +107,7 @@ extension MIDIPacket {
                 return child.value as? UInt8
             }
             
-            return bytes.unpad(with: 0)
+            return Array(bytes[0..<Int(length)])
         }
         set {
             let bytes = newValue.pad(with: 0, to: 256)
@@ -322,10 +322,9 @@ extension MIDIPacketList {
     
     public var packets: [MIDIPacket] {
         var packets = [packet]
-        for _ in (0..<numPackets) {
-            if var packet = packets.last {
-                packets.append(MIDIPacketNext(&packet).pointee)
-            }
+        var packetCopy = packet
+        for _ in (1..<numPackets) {
+            packets.append(MIDIPacketNext(&packetCopy).pointee)
         }
         return packets
     }
